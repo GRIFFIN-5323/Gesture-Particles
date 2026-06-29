@@ -43,8 +43,29 @@ scene.add(particleSystem);
 // ==========================================
 // 3. SHAPE MATH (MORPHING TARGETS)
 // ==========================================
-const shapes = ['heart', 'saturn', 'sphere'];
+const shapes = ['heart', 'saturn', 'sphere', 'lasandi'];
 let currentShapeIndex = 0;
+
+// Generate text points for the name "Lasandi"
+const textPoints = [];
+const tempCanvas = document.createElement('canvas');
+tempCanvas.width = 600;
+tempCanvas.height = 200;
+const tempCtx = tempCanvas.getContext('2d', { willReadFrequently: true });
+tempCtx.fillStyle = 'white';
+tempCtx.font = 'bold 100px Arial';
+tempCtx.textAlign = 'center';
+tempCtx.textBaseline = 'middle';
+tempCtx.fillText('Lasandi', 300, 100);
+const imgData = tempCtx.getImageData(0, 0, tempCanvas.width, tempCanvas.height).data;
+for (let y = 0; y < tempCanvas.height; y += 2) {
+    for (let x = 0; x < tempCanvas.width; x += 2) {
+        const index = (y * tempCanvas.width + x) * 4;
+        if (imgData[index + 3] > 128) {
+            textPoints.push({ x: (x - 300) * 0.15, y: -(y - 100) * 0.15 });
+        }
+    }
+}
 
 function generateShape(shapeType) {
     for (let i = 0; i < particleCount; i++) {
@@ -84,6 +105,21 @@ function generateShape(shapeType) {
             x = r * Math.sin(phi) * Math.cos(theta);
             y = r * Math.sin(phi) * Math.sin(theta);
             z = r * Math.cos(phi);
+        }
+        else if (shapeType === 'lasandi') {
+            if (textPoints.length > 0) {
+                // Distribute particles across the text points
+                const pt = textPoints[i % textPoints.length];
+                x = pt.x + (Math.random() - 0.5) * 0.4;
+                y = pt.y + (Math.random() - 0.5) * 0.4;
+                z = (Math.random() - 0.5) * 1.5;
+                
+                // Scale text up a bit for better visibility
+                x *= 2.0;
+                y *= 2.0;
+            } else {
+                x = y = z = 0;
+            }
         }
 
         targetPositions[i3] = x;
